@@ -1,29 +1,48 @@
 from fastapi import FastAPI
 from subprocess import Popen
+
 app = FastAPI()
 
-robot_process = None
+
+class RobotProcess:
+    def __init__(self):
+        self.process = None
+
+    def start(self, n):
+        if self.process is None:
+            self.process = Popen(["python", "robotScript.py", str(n)])
+            return True
+        return False
+
+    def stop(self):
+        if self.process is not None:
+            self.process.terminate()
+            self.process = None
+            return True
+        return False
+
+
+robot_process = RobotProcess()
+
+
+@app.get("/")
+async def start_robot():
+    return {"This is a robot site."}
+
 
 @app.get("/start")
 async def start_robot():
-    global robot_process
-    if robot_process is None:
-        robot_process = Popen(["python", "robotScript.py", str(0)])
+    if robot_process.start(0):
         return {"Robot started."}
-    else:
-        return {"Robot is already started."}
+
 
 @app.get("/start/{start_number}")
-async def start_robot(start_number: int = 0):
-    global robot_process
-    if robot_process is None:
-        robot_process = Popen(["python", "robotScript.py", str(start_number)])
+async def start_robot(start_number):
+    if robot_process.start(start_number):
         return {"Robot started."}
-    else:
-        return {"Robot is already started."}
 
-@app.get("/stop_robot")
+
+@app.get("/stop")
 async def stop_robot():
-    global robot_process
-    pass
-
+    if robot_process.stop():
+        return "Robot process stopped."
