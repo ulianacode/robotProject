@@ -19,7 +19,7 @@ class RobotProcess:
         if self.process is None:
             self.process = Popen(["python", "robotScript.py", str(start_num)])
             self.start_time = datetime.now()
-            self.start_number = start_num
+            self.start_number = start_num if start_num is not None else 0
             return True
         return False
 
